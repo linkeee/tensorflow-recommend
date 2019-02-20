@@ -10,7 +10,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,34 +20,33 @@ import xlrd
 import utils
 
 DATA_FILE = './fire_theft.xls'
-data= []
+data = []
 # Step 1: read in data from the .xls file
 for line in open("./u1.base").readlines():
-    user,mid,rating,_ = line.split("\t")
-    data.append([user,mid,float(rating)])
-    
+    user, mid, rating, _ = line.split("\t")
+    data.append([user, mid, float(rating)])
+
 # Step 2: create placeholders for input X (number of fire) and label Y (number of theft)
 with tf.variable_scope('Inputs'):
-    X = tf.placeholder(tf.float32,[1,2], name='X')
+    X = tf.placeholder(tf.float32, [1, 2], name='X')
     Y = tf.placeholder(tf.float32, name='Y')
-    tf.summary.histogram("X",X)
-    tf.summary.histogram("Y",Y)
+    tf.summary.histogram("X", X)
+    tf.summary.histogram("Y", Y)
 
 # Step 3: create weight and bias, initialized to 0
 #w = tf.Variable(0.0, name='weights_1')
 #u = tf.Variable(0.0,name='weights_2')
 #b = tf.Variable(0.0, name='bias')
-w = tf.Variable(tf.zeros([2,1]))
-u = tf.Variable(tf.zeros([2,1]))
+w = tf.Variable(tf.zeros([2, 1]))
+u = tf.Variable(tf.zeros([2, 1]))
 b = tf.Variable(0.0)
 
 # Step 4: build model to predict Y
-#Y_predicted = X * X * X * w + X * u + b 
+#Y_predicted = X * X * X * w + X * u + b
 
-#Y_predicted = tf.matmul(tf.multiply(X,X),w) + tf.matmul(X,u) + b 
-#Y_predicted = tf.multiply(X,w) + tf.matmul(X,u) + b 
-Y_predicted = tf.matmul(X,w) + b 
-
+#Y_predicted = tf.matmul(tf.multiply(X,X),w) + tf.matmul(X,u) + b
+#Y_predicted = tf.multiply(X,w) + tf.matmul(X,u) + b
+Y_predicted = tf.matmul(X, w) + b
 
 # Step 5: use the square error as the loss function
 #loss = tf.square(Y - Y_predicted, name='loss')
@@ -62,7 +61,7 @@ optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.1).minimize(loss)
 #optimizer = tf.train.AdadeltaOptimizer(learning_rate=0.01).minimize(loss)
 
 with tf.name_scope("variable"):
-    tf.summary.scalar("loss",loss)
+    tf.summary.scalar("loss", loss)
     #tf.summary.scalar("y_pred",np.sum(Y_predicted))
     #tf.summary.scalar("y",Y)
     #tf.summary.scalar("w",w)
@@ -70,25 +69,30 @@ with tf.name_scope("variable"):
     #tf.summary.scalar("b",b)
 with tf.Session() as sess:
     # Step 7: initialize the necessary variables, in this case, w and b
-    sess.run(tf.global_variables_initializer()) 
+    sess.run(tf.global_variables_initializer())
     writer = tf.summary.FileWriter('./graphs/linear_reg', sess.graph)
     merge_op = tf.summary.merge_all()
     # Step 8: train the model
     sum = 0
-    for i in range(100): # train the model 100 epochs
+    for i in range(100):  # train the model 100 epochs
         total_loss = 0
-        for x, y,z in data:
+        for x, y, z in data:
             #print ("x is {},y is {},z is {}".format(x,y,z))
             # Session runs train_op and fetch values of loss
-            _,l,mo,y_p,yy,xx = sess.run([optimizer,loss,merge_op,Y_predicted,Y,X], feed_dict={X:np.array([x,y]).reshape(1,2), Y:z})
+            _, l, mo, y_p, yy, xx = sess.run(
+                [optimizer, loss, merge_op, Y_predicted, Y, X],
+                feed_dict={
+                    X: np.array([x, y]).reshape(1, 2),
+                    Y: z
+                })
             total_loss += np.sum(l)
             #print ("y_p is {} y is {}".format(y_p,yy))
-        sum += total_loss/len(data)
-        print('Epoch {0}: {1}'.format(i, total_loss/len(data)))
-        writer.add_summary(mo,i)
-    print ("sum is {0}".format(sum/100))
+        sum += total_loss / len(data)
+        print('Epoch {0}: {1}'.format(i, total_loss / len(data)))
+        writer.add_summary(mo, i)
+    print("sum is {0}".format(sum / 100))
     # close the writer when you're done using it
-    writer.close() 
+    writer.close()
     # Step 9: output the values of w and b
-    #w, b ,u = sess.run([w, b ,u]) 
+    #w, b ,u = sess.run([w, b ,u])
 # plot the results
