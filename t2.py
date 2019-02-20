@@ -28,3 +28,7 @@ with tf.Session() as sess:
     print(sess.run([output], feed_dict={in1: [7.], in2: [2.]}))
 
 sess.close()
+
+
+
+
