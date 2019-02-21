@@ -20,7 +20,7 @@ init = tf.global_variables_initializer()
 
 sess = tf.Session()
 sess.run(init)
-for i in range(1000):
+for i in range(2000):
     batch_xs, batch_ys = mnist.train.next_batch(100)
     sess.run([train_step, y], feed_dict={x: batch_xs, y_: batch_ys})
 
